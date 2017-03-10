@@ -1,0 +1,6 @@
+*.pyc
+*.pylint
+*.swp
+build/
+dist/
+grs.egg-info/
