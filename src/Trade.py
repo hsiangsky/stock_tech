@@ -8,54 +8,54 @@ class Trade():
     self.initTrade()
 
   def initTrade(self):
-    self.tradeBuy = dict()
-    self.tradeSell = dict()
-    self.tradeProfit = dict() 
-    self.trade_counter = 0
-    self.buy_lock = False
+    self.tradeBuy = list()
+    self.tradeSell = list()
+    self.tradeCost = 0
+    self.net = 0
+    self.hold = 0
 
   def KD_PerfectBuy_HighestKSell(self, KD):
     self.initTrade()
     for i in range(KD.waitConvergeDay, len(KD.k)):
       if KD.perfectBuyPoints[i]:
-        self.__Buy(i)
+        self.buy(i)
       if KD.k[i] < KD.k[i-1] and KD.k[i] > 65:
-        self.__Sell(i) 
+        self.sell(i) 
 
   def buy(self, idx):
-    if self.buy_lock == False:
-      buyPrice = self.stock.price[idx]
-      self.tradeBuy[self.trade_counter] = \
-          (self.stock.date[idx], buyPrice)
-      self.buy_lock = True
+    buyPrice = self.stock.price[idx]
+    self.tradeCost += buyPrice
+    self.net -= buyPrice
+    self.hold += 1
+    self.tradeBuy.append((self.stock.date[idx], buyPrice))
 
   def sell(self, idx):
-    if self.buy_lock == True:
-      # don't buy sell the same date
-      buyDate = self.tradeBuy[self.trade_counter][0]
-      isTodayBuy = buyDate == self.stock.date[idx]
-      if isTodayBuy:
-        return
-
-      # trade sell
+    # trade sell
+    if self.hold > 0:
       sellPrice = self.stock.price[idx]
-      self.tradeSell[self.trade_counter] = \
-          (self.stock.date[idx], sellPrice)
-      # count Profit
-      buyPrice = self.tradeBuy[self.trade_counter][1]
-      profit = sellPrice-buyPrice
-      percentage = round(profit/buyPrice,4)
-      self.tradeProfit[self.trade_counter] = (profit, percentage)
-      # set control parameters
-      self.buy_lock = False
-      self.trade_counter+=1
+      self.net += sellPrice
+      self.hold -= 1
+      self.tradeSell.append((self.stock.date[idx], sellPrice))
+
 
   def printTradeResult(self):
+    if self.tradeCost == 0:
+      return
     self.__printStockInfo()
     print ""
-    for i in range(len(self.tradeProfit)):
-      self.__printDeal(i)
-    self.__printTradeTotalProfit()
+    for i in range(len(self.tradeBuy)):
+      print "[Buy]" ,
+      print self.tradeBuy[i]
+    for i in range(len(self.tradeSell)):
+      print "[Sell]" ,
+      print self.tradeSell[i]
+
+    if self.hold != 0:
+      print "Hold "+str(self.hold), 
+      print ", sell price: "+str(self.stock.price[-1])
+      self.net += self.stock.price[-1]*self.hold
+    print "[Total Profit]" + str(round(self.net/self.tradeCost, 4))
+#    self.__printTradeTotalProfit()
 
   def printTradeFail(self):
     for i in range(len(self.tradeProfit)):

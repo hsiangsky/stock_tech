@@ -2,16 +2,20 @@
 from KD import KD
 from MACD import MACD
 from DMI import DMI
+from AROON import AROON
+from CCI import CCI
+from CMO import CMO
 
 class Rule():
   def __init__(self, stockObj):
+    self.stock = stockObj
     self.kd = KD(stockObj)
     self.macd = MACD(stockObj)
     self.dmi = DMI(stockObj)
-    self.stock = stockObj
-    self.waitConvergeDay = 20
+    self.aroon = AROON(stockObj)
+    self.cci = CCI(stockObj)
+    self.cmo = CMO(stockObj)
     self.days = len(self.kd.k)
-    #self.kd.printInfo()
 
   def __initFlag(self):
     self.isKD = 0
@@ -40,6 +44,39 @@ class Rule():
       return True
     else:
       return False
+
+  def buyRule_kd_cci(self, i):
+    return (self.kd.isBuyPoint(i) and self.cci.isOverSell(i))
+
+  def sellRule_kd_cci(self, i):
+    return (self.kd.isSellPoint(i) and self.cci.isOverBuy(i))
+
+  def buyRule_kd_cmo(self, i):
+    return (self.kd.isBuyPoint(i) and self.cmo.isOverSell(i))
+
+  def sellRule_kd_cmo(self, i):
+    return (self.kd.isSellPoint(i) and self.cmo.isOverBuy(i))
+
+  def buyRule_cci(self, i):
+    return self.cci.leaveOverSell(i)
+
+  def sellRule_cci(self, i):
+    return (self.cci.enterOverBuy(i) or self.cci.leaveOverBuy(i))
+
+  def buyRule_cmo(self, i):
+    return self.cmo.leaveOverSell(i)
+
+  def sellRule_cmo(self, i):
+    return (self.cmo.enterOverBuy(i) or self.cmo.leaveOverBuy(i))
+
+  def buyRule_macd_aroon(self, i):
+    return (self.aroon.isStrongUp(i) and self.aroon.isUpEnough() \
+            and self.macd.isBuyPoint(i))
+
+  def sellRule_macd_aroon(self, i):
+    return (self.aroon.isStrongDown(i) and self.aroon.isDownEnough() \
+            and self.macd.isSellPoint(i))
+
 
   def buyRule1(self, i):
     if self.__skipRule(i):

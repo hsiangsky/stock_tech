@@ -12,7 +12,7 @@ print 'Total stock: '+str(len(stock_no_list))
 
 # process
 for i in stock_no_list:
-  filename=dataPath+i+'_14MonData.csv'
+  filename=dataPath+i+'.csv'
   print "Download NO."+i+" Stock 14 Mons Data to "+filename+" ..."
   stock = Stock(i,14)
   stock.out_putfile(filename)

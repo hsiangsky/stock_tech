@@ -6,7 +6,7 @@ import sys
 sys.path.append('../')
 from MACD import MACD
 
-stock = Stock.createByCSV('2454', '../../data/2454_14MonData.csv')
+stock = Stock('2330', 14)
 macd= MACD(stock)
 print "MACD: len: "+str(len(macd.macd))
 print macd.macd

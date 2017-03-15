@@ -13,20 +13,20 @@ stock_no_list = [i for i in sorted(TWSENo().all_stock_no)[:-2]]
 print 'Total stock: '+str(len(stock_no_list))
 
 # process
-dataPath = './data/'
-#stock_no_list = ['1215'] 
-for no in stock_no_list[0:20]:
-  #stock = Stock(no, 12)
-  filename=dataPath+no+'_14MonData.csv'
+dataPath = '/home/hsiangsky/stock/data/all_stk/'
+#stock_no_list = ['2023'] 
+for no in stock_no_list:
+#  stock = Stock(no, 15)
+  filename=dataPath+no+'.csv'
   stock = Stock.createByCSV(no,filename)
 
   rule = Rule(stock)
   trade = Trade(stock)
   trade.initTrade()
-  for i in range(rule.waitConvergeDay, rule.days):
-    if rule.buyRule1(i):
+  for i in range(rule.days):
+    if rule.buyRule_kd_cci(i):
       trade.buy(i)
-    if rule.sellRule1(i):
+    if rule.sellRule_kd_cci(i):
       trade.sell(i)
   trade.printTradeResult()
 
